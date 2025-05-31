@@ -16,8 +16,7 @@ class PokedexPSQLClient:
             session.add(pokemon)
             session.commit()
 
-    def get_pokemon_by_id(self, id: int) -> Pokemon | None:
+    def get_pokemon_by_id(self, id: int) -> dict | None:
         with Session(self.engine) as session:
             pokemon = session.query(Pokemon).get(id)
-            rprint(pokemon.to_dict()) if pokemon else rprint("Pokemon not found")
-            return pokemon
+            return pokemon.to_dict() if pokemon else None

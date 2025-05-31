@@ -20,9 +20,6 @@ async def main():
     )
 
     await migration_service.migrate()
-
-    pokedex_psql.get_pokemon_by_id(id=149)
-
     await pokedex_mongo.client.close()
 
 

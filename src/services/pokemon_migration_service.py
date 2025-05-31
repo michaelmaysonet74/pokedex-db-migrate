@@ -9,7 +9,6 @@ from psql.pokedex_psql_client import PokedexPSQLClient
 from psql.models.pokemon import Pokemon
 from psql.models.ability import Ability
 from psql.models.base_stats import BaseStats
-from psql.models.evolution import Evolution
 from psql.models.evolution_chain import EvolutionChain
 from psql.models.measurement import Measurement
 
@@ -25,8 +24,9 @@ class PokemonMigrationService:
 
     async def migrate(self) -> None:
         for gen in range(1, 10):
-            src_pokemon_list = (
-                await self.pokedex_mongo_client.get_pokemon_by_generation(gen)
+            src_pokemon_list = sorted(
+                await self.pokedex_mongo_client.get_pokemon_by_generation(gen),
+                key=lambda pokemon: pokemon["id"],
             )
             for src_pokemon in src_pokemon_list:
                 if src_pokemon != None:
@@ -71,22 +71,19 @@ class PokemonMigrationService:
 
     def _create_evolution_chain(self, src: SrcEvolutionChain) -> EvolutionChain:
         return EvolutionChain(
-            from_=self._create_evolution(src=src["from"]),  # type: ignore
+            from_=self._create_evolution(src["from"]) if src["from"] else None,  # type: ignore
             to=(
-                [self._create_evolution(src=to) for to in src["to"]]
+                [self._create_evolution(evolution) for evolution in src["to"]]
                 if src["to"]
                 else []
             ),
         )
 
-    def _create_evolution(self, src: SrcEvolution | None) -> Evolution | None:
-        if not src:
-            return None
-
-        return Evolution(
-            id=int(src["id"]),
-            name=src["name"],
-        )
+    def _create_evolution(self, src: SrcEvolution) -> dict:
+        return {
+            "id": int(src["id"]),
+            "name": src["name"],
+        }
 
     def _create_measurment(self, src: SrcMeasurement) -> Measurement:
         return Measurement(height=src["height"], weight=src["weight"])

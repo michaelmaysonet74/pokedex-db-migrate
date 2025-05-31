@@ -4,6 +4,7 @@ from psql.models.base_stats import BaseStats
 from psql.models.evolution_chain import EvolutionChain
 from psql.models.measurement import Measurement
 
+import json
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -17,12 +18,12 @@ class Pokemon(Base):
 
     abilities: Mapped[list[Ability]] = relationship(
         back_populates="pokemon",
-        cascade="all",
+        cascade="all, delete-orphan",
     )
 
     base_stats: Mapped[BaseStats] = relationship(
         back_populates="pokemon",
-        cascade="all",
+        cascade="all, delete-orphan",
     )
 
     category: Mapped[str] = mapped_column(String)
@@ -30,14 +31,14 @@ class Pokemon(Base):
 
     evolution: Mapped[EvolutionChain] = relationship(
         back_populates="pokemon",
-        cascade="all",
+        cascade="all, delete-orphan",
     )
 
     generation: Mapped[int] = mapped_column(Integer)
 
     measurement: Mapped[Measurement] = relationship(
         back_populates="pokemon",
-        cascade="all",
+        cascade="all, delete-orphan",
     )
 
     sprite: Mapped[str] = mapped_column(String)
@@ -59,6 +60,9 @@ class Pokemon(Base):
             "types": self.types,
             "weaknesses": self.weaknesses,
         }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), indent=2)
 
     def __repr__(self) -> str:
         return (
