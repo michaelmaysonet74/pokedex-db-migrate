@@ -12,7 +12,7 @@ class PokedexMongoClient:
         database = client.get_database("pokedex")
         self._pokemon: Collection[Pokemon] = database.get_collection("pokemon")
 
-    async def get_pokemon_by_id(self, id: int) -> Pokemon:
+    async def get_pokemon_by_id(self, id: int) -> Pokemon | None:
         query = {"id": id}
         return await self._pokemon.find_one(query)
 

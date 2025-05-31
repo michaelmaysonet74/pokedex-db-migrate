@@ -1,10 +1,9 @@
 from psql.models.base import Base
 from psql.models.pokemon import Pokemon
-from psql.models.ability import Ability
-from psql.models.measurement import Measurement
 
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session, selectinload
+from rich import print as rprint
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 
 class PokedexPSQLClient:
@@ -19,12 +18,6 @@ class PokedexPSQLClient:
 
     def get_pokemon_by_id(self, id: int) -> Pokemon | None:
         with Session(self.engine) as session:
-            stmt = (
-                select(Pokemon)
-                .options(
-                    selectinload(Pokemon.abilities),
-                    selectinload(Pokemon.measurement),
-                )
-                .where(Pokemon.id == id)
-            )
-            return session.execute(stmt).scalar_one_or_none()
+            pokemon = session.query(Pokemon).get(id)
+            rprint(pokemon.to_dict()) if pokemon else rprint("Pokemon not found")
+            return pokemon

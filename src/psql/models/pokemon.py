@@ -1,5 +1,7 @@
 from psql.models.base import Base
 from psql.models.ability import Ability
+from psql.models.base_stats import BaseStats
+from psql.models.evolution_chain import EvolutionChain
 from psql.models.measurement import Measurement
 
 from sqlalchemy import Integer, String
@@ -13,26 +15,55 @@ class Pokemon(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String)
 
-    abilities: Mapped[list[Ability]] = relationship(  # type: ignore
-        back_populates="pokemon", cascade="all, delete-orphan"
+    abilities: Mapped[list[Ability]] = relationship(
+        back_populates="pokemon",
+        cascade="all",
+    )
+
+    base_stats: Mapped[BaseStats] = relationship(
+        back_populates="pokemon",
+        cascade="all",
     )
 
     category: Mapped[str] = mapped_column(String)
     entry: Mapped[str] = mapped_column(String)
-    sprite: Mapped[str] = mapped_column(String)
-    generation: Mapped[int] = mapped_column(Integer)
 
-    measurement: Mapped[Measurement] = relationship(  # type: ignore
-        back_populates="pokemon", cascade="all, delete-orphan"
+    evolution: Mapped[EvolutionChain] = relationship(
+        back_populates="pokemon",
+        cascade="all",
     )
 
+    generation: Mapped[int] = mapped_column(Integer)
+
+    measurement: Mapped[Measurement] = relationship(
+        back_populates="pokemon",
+        cascade="all",
+    )
+
+    sprite: Mapped[str] = mapped_column(String)
     types: Mapped[list[str]] = mapped_column(ARRAY(String))
     weaknesses: Mapped[list[str]] = mapped_column(ARRAY(String))
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "abilities": [ability.to_dict() for ability in self.abilities],
+            "base_stats": self.base_stats.to_dict(),
+            "category": self.category,
+            "entry": self.entry,
+            "evolution": self.evolution.to_dict(),
+            "generation": self.generation,
+            "measurement": self.measurement.to_dict(),
+            "sprite": self.sprite,
+            "types": self.types,
+            "weaknesses": self.weaknesses,
+        }
 
     def __repr__(self) -> str:
         return (
             f"Pokemon(id={self.id}, name={self.name}, abilities={self.abilities}, "
-            f"category={self.category}, entry={self.entry}, sprite={self.sprite}, "
-            f"generation={self.generation}, measurement={self.measurement}, "
-            f"types={self.types}, weaknesses={self.weaknesses})"
+            f"base_stats={self.base_stats}, category={self.category}, entry={self.entry}, "
+            f"evolution={self.evolution} sprite={self.sprite}, generation={self.generation}, "
+            f"measurement={self.measurement}, types={self.types}, weaknesses={self.weaknesses})"
         )

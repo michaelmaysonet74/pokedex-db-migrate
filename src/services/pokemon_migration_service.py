@@ -1,10 +1,16 @@
 from mongo_db.pokedex_mongo_client import PokedexMongoClient
 from mongo_db.models.pokemon import Pokemon as SrcPokemon
 from mongo_db.models.ability import Ability as SrcAbility
+from mongo_db.models.base_stats import BaseStats as SrcBaseStats
+from mongo_db.models.evolution import Evolution as SrcEvolution
+from mongo_db.models.evolution_chain import EvolutionChain as SrcEvolutionChain
 from mongo_db.models.measurement import Measurement as SrcMeasurement
 from psql.pokedex_psql_client import PokedexPSQLClient
 from psql.models.pokemon import Pokemon
 from psql.models.ability import Ability
+from psql.models.base_stats import BaseStats
+from psql.models.evolution import Evolution
+from psql.models.evolution_chain import EvolutionChain
 from psql.models.measurement import Measurement
 
 
@@ -18,17 +24,24 @@ class PokemonMigrationService:
         self.podedex_psql_client = podedex_psql_client
 
     async def migrate(self) -> None:
-        src_pokemon = await self.pokedex_mongo_client.get_pokemon_by_id(id=1)
-        sql_pokemon = self._create_pokemon(src=src_pokemon)
-        self.podedex_psql_client.insert_pokemon(pokemon=sql_pokemon)
+        for gen in range(1, 10):
+            src_pokemon_list = (
+                await self.pokedex_mongo_client.get_pokemon_by_generation(gen)
+            )
+            for src_pokemon in src_pokemon_list:
+                if src_pokemon != None:
+                    sql_pokemon = self._create_pokemon(src=src_pokemon)
+                    self.podedex_psql_client.insert_pokemon(pokemon=sql_pokemon)
 
     def _create_pokemon(self, src: SrcPokemon) -> Pokemon:
         return Pokemon(
             id=src["id"],
             name=src["name"],
             abilities=self._create_abilities(src=src["abilities"]),
+            base_stats=self._create_base_stats(src=src["baseStats"]),
             category=src["category"],
             entry=src["entry"],
+            evolution=self._create_evolution_chain(src=src["evolution"]),
             generation=src["generation"],
             measurement=self._create_measurment(src=src["measurement"]),
             sprite=src["sprite"],
@@ -45,6 +58,35 @@ class PokemonMigrationService:
             )
             for ability in src
         ]
+
+    def _create_base_stats(self, src: SrcBaseStats) -> BaseStats:
+        return BaseStats(
+            hp=src["hp"],
+            attack=src["attack"],
+            defense=src["defense"],
+            special_attack=src["specialAttack"],
+            special_defense=src["specialDefense"],
+            speed=src["speed"],
+        )
+
+    def _create_evolution_chain(self, src: SrcEvolutionChain) -> EvolutionChain:
+        return EvolutionChain(
+            from_=self._create_evolution(src=src["from"]),  # type: ignore
+            to=(
+                [self._create_evolution(src=to) for to in src["to"]]
+                if src["to"]
+                else []
+            ),
+        )
+
+    def _create_evolution(self, src: SrcEvolution | None) -> Evolution | None:
+        if not src:
+            return None
+
+        return Evolution(
+            id=int(src["id"]),
+            name=src["name"],
+        )
 
     def _create_measurment(self, src: SrcMeasurement) -> Measurement:
         return Measurement(height=src["height"], weight=src["weight"])
