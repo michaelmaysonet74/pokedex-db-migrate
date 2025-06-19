@@ -1,7 +1,6 @@
 from psql.models.base import Base
 from psql.models.pokemon import Pokemon
 
-from rich import print as rprint
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
