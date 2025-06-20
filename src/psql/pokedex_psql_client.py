@@ -6,7 +6,10 @@ from sqlalchemy.orm import Session
 
 
 class PokedexPSQLClient:
-    def __init__(self, uri: str) -> None:
+    def __init__(self, uri: str | None) -> None:
+        if uri is None:
+            raise ValueError("Database URI must be provided")
+
         self.engine = create_engine(url=uri, echo=True)
         Base.metadata.create_all(self.engine)
 

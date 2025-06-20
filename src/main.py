@@ -11,16 +11,19 @@ load_dotenv()
 
 
 async def main():
-    pokedex_mongo = PokedexMongoClient(uri=os.getenv("MONGO_DB_URI"))
-    pokedex_psql = PokedexPSQLClient(uri=os.getenv("PSQL_DB_URI"))
+    try:
+        pokedex_mongo = PokedexMongoClient(uri=os.getenv("MONGO_DB_URI"))
+        pokedex_psql = PokedexPSQLClient(uri=os.getenv("PSQL_DB_URI"))
 
-    migration_service = PokemonMigrationService(
-        pokedex_mongo_client=pokedex_mongo,
-        podedex_psql_client=pokedex_psql,
-    )
+        migration_service = PokemonMigrationService(
+            pokedex_mongo_client=pokedex_mongo,
+            podedex_psql_client=pokedex_psql,
+        )
 
-    await migration_service.migrate()
-    await pokedex_mongo.client.close()
+        await migration_service.migrate()
+        await pokedex_mongo.client.close()
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
