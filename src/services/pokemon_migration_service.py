@@ -12,8 +12,11 @@ from psql.models.base_stats import BaseStats
 from psql.models.evolution_chain import EvolutionChain
 from psql.models.measurement import Measurement
 
+LATEST_GENERATION: int = 9
+
 
 class PokemonMigrationService:
+
     def __init__(
         self,
         pokedex_mongo_client: PokedexMongoClient,
@@ -23,7 +26,7 @@ class PokemonMigrationService:
         self.podedex_psql_client = podedex_psql_client
 
     async def migrate(self) -> None:
-        for gen in range(1, 10):
+        for gen in range(1, LATEST_GENERATION + 1):
             src_pokemon_list = sorted(
                 await self.pokedex_mongo_client.get_pokemon_by_generation(gen),
                 key=lambda pokemon: pokemon["id"],
