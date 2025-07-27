@@ -43,6 +43,8 @@ class Pokemon(Base):
 
     sprite: Mapped[str] = mapped_column(String)
     types: Mapped[list[str]] = mapped_column(ARRAY(String))
+    immunities: Mapped[list[str]] = mapped_column(ARRAY(String))
+    resistances: Mapped[list[str]] = mapped_column(ARRAY(String))
     weaknesses: Mapped[list[str]] = mapped_column(ARRAY(String))
 
     def to_dict(self) -> dict:
@@ -58,6 +60,8 @@ class Pokemon(Base):
             "measurement": self.measurement.to_dict(),
             "sprite": self.sprite,
             "types": self.types,
+            "immunities": self.immunities,
+            "resistances": self.resistances,
             "weaknesses": self.weaknesses,
         }
 
@@ -69,5 +73,6 @@ class Pokemon(Base):
             f"Pokemon(id={self.id}, name={self.name}, abilities={self.abilities}, "
             f"base_stats={self.base_stats}, category={self.category}, entry={self.entry}, "
             f"evolution={self.evolution} sprite={self.sprite}, generation={self.generation}, "
-            f"measurement={self.measurement}, types={self.types}, weaknesses={self.weaknesses})"
+            f"measurement={self.measurement}, types={self.types}, "
+            f"immunities={self.immunities}, resistances={self.resistances}, weaknesses={self.weaknesses})"
         )
