@@ -18,4 +18,6 @@ class Pokemon(TypedDict):
     measurement: Measurement
     sprite: str
     types: list[str]
+    immunities: list[str]
+    resistances: list[str]
     weaknesses: list[str]

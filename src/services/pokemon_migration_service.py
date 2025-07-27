@@ -49,6 +49,8 @@ class PokemonMigrationService:
             measurement=self._create_measurment(src=src["measurement"]),
             sprite=src["sprite"],
             types=src["types"],
+            immunities=src["immunities"],
+            resistances=src["resistances"],
             weaknesses=src["weaknesses"],
         )
 
