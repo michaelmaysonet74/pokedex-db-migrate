@@ -6,6 +6,8 @@ SELECT p.id,
     p.sprite,
     p.types,
     p.weaknesses,
+    p.resistances,
+    p.immunities,
     JSON_BUILD_OBJECT(
         'hp', bs.hp,
         'atk', bs.attack,
