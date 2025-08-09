@@ -80,7 +80,7 @@ class PokemonMigrationService:
             to=(
                 [self._create_evolution(evolution) for evolution in src["to"]]
                 if src["to"]
-                else []
+                else None
             ),
         )
 
